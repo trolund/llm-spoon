@@ -1,8 +1,10 @@
 # LLM Spoon for Hammerspoon
 
+Simple spoon for rewriting selected text.
+
 ## Installation
 
-Double-click the "ai-helper.spoon" file, and Hammerspoon will install it for you.
+Download this repo then double-click "ai-helper.spoon", and Hammerspoon will install the spoon for you.
 
 ## Setting up the Spoon
 
