@@ -10,7 +10,7 @@ Download this repo then double-click "ai-helper.spoon", and Hammerspoon will ins
 
 ## Setting up the Spoon
 
-After installation, you need to set up the Spoon in the Hammerspoon config file as shown below. Get you api key by going to: https://dashboard.cohere.com/api-keys.
+After installation, you need to set up the Spoon in the Hammerspoon config file as shown below. Get your API key by going to [Cohere API Keys](https://dashboard.cohere.com/api-keys).
 
 ```lua
 hs.settings.set("AiHelper.apiKey", "<COHERE_API_KEY>")
