@@ -11,16 +11,16 @@ Download this repo then double-click "ai-helper.spoon", and Hammerspoon will ins
 After installation, you need to set up the Spoon in the Hammerspoon config file as shown below. Get you api key by going to: https://dashboard.cohere.com/api-keys.
 
 ```lua
-hs.settings.set("RewriteSpoon.apiKey", "<COHERE_API_KEY>")
+hs.settings.set("AiHelper.apiKey", "<COHERE_API_KEY>")
 
 -- Load your Rewrite Spoon
-hs.loadSpoon("RewriteSpoon")
+hs.loadSpoon("AiHelper")
 
 -- Initialize the Spoon
-spoon.RewriteSpoon:init()
+spoon.AiHelper:init()
 
 -- Bind hotkeys
-spoon.RewriteSpoon:bindHotkeys({
+spoon.AiHelper:bindHotkeys({
     rewrite = {{"cmd", "alt", "ctrl"}, "R"}
 })
 ```
