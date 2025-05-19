@@ -6,7 +6,7 @@ The Spoon contains four prompts designed to assist users with their writing: Rew
 
 ## Installation
 
-Download this repo then double-click "ai-helper.spoon", and Hammerspoon will install the spoon for you.
+Download this repo then double-click "AiHelper.spoon", and Hammerspoon will install the spoon for you.
 
 ## Setting up the Spoon
 
