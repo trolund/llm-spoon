@@ -1,6 +1,8 @@
 # LLM Spoon for Hammerspoon
 
-Simple spoon for rewriting selected text.
+Simple spoon for rewriting selected text via an LLM from Cohere.
+
+The Spoon contains four prompts designed to assist users with their writing: Rewrite, which improves sentence structure, grammar, and spelling; Summarize, which provides a concise summary of a longer text; and Translate, which offers translation services between Danish and English.
 
 ## Installation
 
@@ -8,19 +10,19 @@ Download this repo then double-click "ai-helper.spoon", and Hammerspoon will ins
 
 ## Setting up the Spoon
 
-After installation, you need to set up the Spoon in the Hammerspoon config file as shown below. Get you api key by going to: https://dashboard.cohere.com/api-keys.
+After installation, you need to set up the Spoon in the Hammerspoon config file as shown below. Get your API key by going to [Cohere API Keys](https://dashboard.cohere.com/api-keys).
 
 ```lua
-hs.settings.set("RewriteSpoon.apiKey", "<COHERE_API_KEY>")
+hs.settings.set("AiHelper.apiKey", "<COHERE_API_KEY>")
 
 -- Load your Rewrite Spoon
-hs.loadSpoon("RewriteSpoon")
+hs.loadSpoon("AiHelper")
 
 -- Initialize the Spoon
-spoon.RewriteSpoon:init()
+spoon.AiHelper:init()
 
 -- Bind hotkeys
-spoon.RewriteSpoon:bindHotkeys({
+spoon.AiHelper:bindHotkeys({
     rewrite = {{"cmd", "alt", "ctrl"}, "R"}
 })
 ```
