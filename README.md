@@ -1,6 +1,8 @@
 # LLM Spoon for Hammerspoon
 
-Simple spoon for rewriting selected text.
+Simple spoon for rewriting selected text via an LLM from Cohere.
+
+The Spoon contains four prompts designed to assist users with their writing: Rewrite, which improves sentence structure, grammar, and spelling; Summarize, which provides a concise summary of a longer text; and Translate, which offers translation services between Danish and English.
 
 ## Installation
 
