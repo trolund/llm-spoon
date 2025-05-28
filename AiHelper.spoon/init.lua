@@ -14,6 +14,8 @@ obj.autoInstallDeps = true
 function obj:init()
     self.scriptPath = hs.spoons.resourcePath("rewrite.py")
     self.apiKey = hs.settings.get("AiHelper.apiKey")
+    self.provider = config and config.provider or "cohere"
+    self.model = config and config.model or "command-r-plus"
 
     if not self.apiKey then
         hs.alert("Missing API key: set with hs.settings.set('AiHelper.apiKey', 'your-key')")
@@ -25,28 +27,50 @@ function obj:init()
 end
 
 function obj:ensurePythonDeps()
+    local requirementsPath = hs.spoons.resourcePath("requirements.txt")
+
+    -- Python script to parse and check all packages in requirements.txt
+    local checkScript = string.format([[
+import sys
+import os
+req_file = %q
+missing = []
+
+with open(req_file) as f:
+    for line in f:
+        pkg = line.strip().split("==")[0] if "==" in line else line.strip()
+        if not pkg or pkg.startswith("#"):
+            continue
+        try:
+            __import__(pkg)
+        except ImportError:
+            missing.append(pkg)
+
+sys.exit(1 if missing else 0)
+]], requirementsPath)
+
     local check = hs.task.new("/usr/bin/python3", function(exitCode, stdOut, stdErr)
         if exitCode ~= 0 then
             hs.alert("Installing Python dependencies...")
-            local requirementsPath = hs.spoons.resourcePath("requirements.txt")
-
-            local pip = hs.task.new("/usr/bin/python3", function(code, out, err)
+            local pipInstall = hs.task.new("/usr/bin/python3", function(code, out, err)
                 if code == 0 then
-                    hs.alert("Python dependencies installed")
+                    hs.alert("Python dependencies installed successfully")
                 else
                     hs.alert("Failed to install Python dependencies")
-                    print("Pip error:", err)
+                    print("Pip install error:", err)
                 end
             end, {"-m", "pip", "install", "--user", "-r", requirementsPath})
 
-            pip:start()
+            pipInstall:start()
+        else
+            hs.alert("Python dependencies already installed")
         end
-    end, {"-c", "import cohere"})
+    end, {"-c", checkScript})
 
     check:start()
 end
 
-local function handleRewrite(mode, scriptPath, apiKey)
+function obj:handleRewrite(mode, scriptPath, apiKey)
     return function()
         hs.alert("Rewriting text...")
 
@@ -74,8 +98,9 @@ local function handleRewrite(mode, scriptPath, apiKey)
                     print("Error:", stdErr)
                 end
             end, {"-c",
-                  string.format("COHERE_API_KEY='%s' TEXT='%s' MODE='%s' /usr/bin/python3 %s", apiKey, selectedText,
-                mode, scriptPath)})
+                  string.format(
+                "AIHELPER_API_KEY='%s' /usr/bin/python3 %s --provider %s --model %s --mode '%s' --text '%s'", apiKey,
+                scriptPath, self.provider, self.model, mode, selectedText)})
 
             task:start()
             task:closeInput()
@@ -97,11 +122,11 @@ function obj:bindHotkeys(mapping)
         return
     end
 
-    hs.hotkey.bind(hotkeyRewrite[1], hotkeyRewrite[2], handleRewrite("rewrite", scriptPath, apiKey))
-    hs.hotkey.bind(hotkeySummarize[1], hotkeySummarize[2], handleRewrite("summarize", scriptPath, apiKey))
-    hs.hotkey.bind(hotkeyTranslate[1], hotkeyTranslate[2], handleRewrite("translate", scriptPath, apiKey))
+    hs.hotkey.bind(hotkeyRewrite[1], hotkeyRewrite[2], self:handleRewrite("rewrite", scriptPath, apiKey))
+    hs.hotkey.bind(hotkeySummarize[1], hotkeySummarize[2], self:handleRewrite("summarize", scriptPath, apiKey))
+    hs.hotkey.bind(hotkeyTranslate[1], hotkeyTranslate[2], self:handleRewrite("translate", scriptPath, apiKey))
     hs.hotkey.bind(hotkeyTranslateToEnglish[1], hotkeyTranslateToEnglish[2],
-        handleRewrite("translate_to_english", scriptPath, apiKey))
+        self:handleRewrite("translate_to_english", scriptPath, apiKey))
 end
 
 return obj
