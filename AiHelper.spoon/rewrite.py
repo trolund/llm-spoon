@@ -1,44 +1,58 @@
 #!/usr/bin/env python3
-import cohere
 import sys
 import os
+import argparse
+from pybars import Compiler
+import openai
+import cohere
 
-api_key = os.environ.get("COHERE_API_KEY")
-text = os.environ.get("TEXT")
-mode = os.environ.get("MODE")
+compiler = Compiler()
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
-print("Using API key:", api_key, file=sys.stderr)
+def load_prompt(mode, text):
+    prompt_path = os.path.join(script_dir, "prompts", f"{mode}.hbs")
+    with open(prompt_path, "r") as f:
+        template = compiler.compile(f.read())
+    return template({"mode": mode, "text": text})
 
-if not api_key:
-    print("Missing COHERE_API_KEY environment variable", file=sys.stderr)
-    sys.exit(1)
+def call_openai(model, prompt, api_key):
+    openai.api_key = api_key
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7
+    )
+    return response['choices'][0]['message']['content'].strip()
 
+def call_cohere(model, prompt, api_key):
+    co = cohere.Client(api_key)
+    response = co.generate(
+        model=model,
+        prompt=prompt,
+        temperature=0.7
+    )
+    return response.generations[0].text.strip()
 
-print("Input text length:", len(text), file=sys.stderr)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--provider", required=True)
+    parser.add_argument("--model", required=True)
+    parser.add_argument("--mode", required=True)
+    parser.add_argument("--text", required=True)
+    args = parser.parse_args()
 
-if not text:
-    print("Input text is empty", file=sys.stderr)
-    sys.exit(1)
+    api_key = os.environ.get("AIHELPER_API_KEY")
+    if not api_key:
+        sys.exit("Missing AIHELPER_API_KEY")
 
-co = cohere.Client(api_key)
+    prompt = load_prompt(args.mode, args.text)
 
-# function that based on the mode will generate a prompt for the cohere API
-def generate_prompt(mode, text):
-    if mode == "rewrite":
-        return f"Please rewrite this text to improve clarity, grammar, and flow. Please only provide the improved text. The text will either be in english or danish. Input:\n\n{text}"
-    elif mode == "summarize":
-        return f"Please summarize this text. Please only provide the summary. The text will either be in english or danish. Input:\n\n{text}"
-    elif mode == "translate":
-        return f"Please translate this text to danish. Please only provide the translation. The text will either be in english or danish. Input:\n\n{text}"
-    elif mode == "translate_to_english":
-        return f"Please translate this text to english. Please only provide the translation. The text will either be in english or danish. Input:\n\n{text}"
+    if args.provider == "openai":
+        print(call_openai(args.model, prompt, api_key))
+    elif args.provider == "cohere":
+        print(call_cohere(args.model, prompt, api_key))
     else:
-        raise ValueError("Invalid mode")
-    
-response = co.generate(
-    model='command-r-plus',
-    prompt=generate_prompt(mode, text),
-    temperature=0.7,
-)
+        sys.exit("Unsupported provider")
 
-print(response.generations[0].text.strip())
+if __name__ == "__main__":
+    main()
