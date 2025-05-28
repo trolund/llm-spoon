@@ -22,9 +22,6 @@ spoon.AiHelper:init({
     model = "gpt-4o" -- or "command-r-plus"
 })
 
--- Initialize the Spoon
-spoon.AiHelper:init()
-
 -- Bind hotkeys
 spoon.AiHelper:bindHotkeys({
     rewrite = {{"cmd", "alt", "ctrl"}, "R"}
