@@ -13,6 +13,7 @@ Download this repo then double-click "AiHelper.spoon", and Hammerspoon will inst
 After installation, you need to set up the Spoon in the Hammerspoon config file as shown below. Get your API key by going to the LLM providers website.
 
 ```lua
+-- Set Api key
 hs.settings.set("AiHelper.apiKey", "<PROVIDER_API_KEY>")
 
 -- Load your Rewrite Spoon
