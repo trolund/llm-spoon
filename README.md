@@ -1,47 +1,82 @@
-# 📚🥄 LLM Spoon for Hammerspoon
+# AiHelper Spoon for Hammerspoon
 
-Simple spoon for rewriting selected text via an LLM from Cohere or OpenAI.
+`AiHelper.spoon` lets you transform selected text from anywhere on macOS with a hotkey and an LLM.
 
-The Spoon contains four prompts designed to assist users with their writing: Rewrite, which improves sentence structure, grammar, and spelling; Summarize, which provides a concise summary of a longer text; and Translate, which offers translation services between Danish and English.
+It currently supports:
 
-## 🚀 Installation
+- `rewrite`: fix spelling and grammar while preserving the original wording and tone
+- `summarize`: return a concise summary of the selected text
+- `translate`: translate selected text to Danish
+- `translate_to_english`: translate selected text to English
 
-Download this repo then double-click "AiHelper.spoon", and Hammerspoon will install the spoon for you.
+The Spoon supports both OpenAI and Cohere.
 
-The spoon is using Python3. You can install Python 3 with Homebrew like this:
+## Installation
+
+1. Install Python 3 if it is not already available:
 
 ```bash
 brew install python
-```
-
-After installation, verify it works:
-
-```bash
 python3 --version
 pip3 --version
 ```
 
-The Python scripts dependencies, are automatically installed when you refresh the Hammerspoon configuration, unless they are already installed.
+2. Download or clone this repository.
+3. Double-click `AiHelper.spoon` to install it in Hammerspoon.
 
-## 🛠️ Setting up the Spoon
+Python dependencies from [`AiHelper.spoon/requirements.txt`](/Users/troelslund/Documents/Code/llm-spoon/AiHelper.spoon/requirements.txt) are installed automatically when the Spoon initializes, unless you disable that behavior.
 
-After installation, you need to set up the Spoon in the Hammerspoon config file as shown below. Get your API key by going to the LLM providers website.
+## Setup
+
+Add this to your Hammerspoon config:
 
 ```lua
--- Set Api key
 hs.settings.set("AiHelper.apiKey", "<PROVIDER_API_KEY>")
-🥄
--- Load your Rewrite Spoon
+
 hs.loadSpoon("AiHelper")
 spoon.AiHelper:init({
-    provider = "openai", -- or "cohere"
-    model = "gpt-4o" -- or "command-r-plus"
+    provider = "openai",      -- or "cohere"
+    model = "gpt-4o",         -- or e.g. "command-r-plus"
+    autoInstallDeps = true,   -- optional, default is true
+    -- pythonPath = "/opt/homebrew/bin/python3", -- optional override
 })
 
--- Bind hotkeys
 spoon.AiHelper:bindHotkeys({
-    rewrite = {{"cmd", "alt", "ctrl"}, "R"}
+    rewrite = {{"cmd", "alt", "ctrl"}, "R"},
+    summarize = {{"cmd", "alt", "ctrl"}, "S"},
+    translate = {{"cmd", "alt", "ctrl"}, "T"},
+    translate_to_english = {{"cmd", "alt", "ctrl"}, "E"},
 })
 ```
 
-Then you can reload the Hammerspoon configuration and start using the Spoon 🥄!
+Then reload your Hammerspoon configuration.
+
+## Defaults
+
+If you do not override them, the Spoon uses these defaults:
+
+- `provider = "cohere"`
+- `model = "command-r-plus"`
+- `autoInstallDeps = true`
+- `pythonPath = "/opt/homebrew/bin/python3"` when available, otherwise `"/usr/bin/python3"`
+
+## Usage
+
+1. Select text in any app.
+2. Press one of the configured hotkeys.
+3. The Spoon copies the selection, sends it to the configured provider, and pastes the result back in place.
+
+If no text is selected, or the API key is missing, Hammerspoon will show an alert.
+
+## Requirements
+
+- macOS
+- [Hammerspoon](https://www.hammerspoon.org/)
+- Python 3
+- An OpenAI or Cohere API key
+
+## Project Structure
+
+- [`AiHelper.spoon/init.lua`](/Users/troelslund/Documents/Code/llm-spoon/AiHelper.spoon/init.lua): Hammerspoon integration, hotkeys, clipboard flow, dependency install
+- [`AiHelper.spoon/rewrite.py`](/Users/troelslund/Documents/Code/llm-spoon/AiHelper.spoon/rewrite.py): prompt loading and provider API calls
+- [`AiHelper.spoon/prompts/`](/Users/troelslund/Documents/Code/llm-spoon/AiHelper.spoon/prompts): prompt templates for each mode
